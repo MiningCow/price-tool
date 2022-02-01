@@ -1,34 +1,45 @@
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Select, Button } from "antd";
-import componentTypes from "../mock/InitialComponentTypes";
+import styled from "styled-components";
+import { useSelector } from "react-redux"
+import { RootState } from "../redux/store";
+import ComponentType from "../types/ComponentType";
+import ComponentGroupType from "../types/ComponentGroupType";
 
 const { Option } = Select;
 
+const StyledSelect = styled(Select)`
+  width: 400px
+`
+
 const Calculator: FC = () => {
   const navigate = useNavigate();
+  const componentGroups = useSelector((state: RootState) => state.component);
 
-  const newComponentTypes = Object.values(componentTypes);
+  const newComponentGroups = Object.values(componentGroups);
+
+  const renderComponentOptions = useCallback(({ title, price }: ComponentType) => <Option value={title}>{title} ${price}</Option>
+  , []);
+
+  const renderComponents = useCallback(({ title, components }: ComponentGroupType) => {
+    const newComponents = Object.values(components);
+
+    return (
+      <>
+        <h2>{title}</h2>
+        <StyledSelect>
+          {newComponents.map(renderComponentOptions)}
+        </StyledSelect>
+      </>
+    );
+  }, []);
 
   return (
     <>
       <h1>Calculator</h1>
-      <Button type="primary" onClick={() => navigate("/edit")}>Edit</Button>
-      {newComponentTypes.map(({ title, components }) => {
-        const newComponents = Object.values(components);
-        return (
-          <>
-            <h2>{title}</h2>
-            <Select style={{ width: 400 }}>
-              {newComponents.map(({ title, price }) => {
-                return (
-                  <Option value={title}>{title} ${price}</Option>
-                );
-              })}
-            </Select>
-          </>
-        );
-      })}
+      <Button type="primary" onClick={() => navigate("/component-groups")}>Edit</Button>
+      {newComponentGroups.map(renderComponents)}
     </>
   );
 }
